@@ -1,0 +1,1 @@
+# Notes\n\n- Dictionary reads are O(1) on average.\n- Mutations are logged before memory is updated.\n- Startup replays the log to recover state.\n- RLock protects concurrent access.\n- Compaction shrinks old history to current state.\n
