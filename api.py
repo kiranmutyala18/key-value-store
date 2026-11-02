@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import os
 from collections import Counter
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -46,14 +47,17 @@ class Metrics:
         return "\n".join(lines) + "\n"
 
 
-def create_app(
-    log_path: str | Path = Path(os.getenv("KV_LOG_PATH") or "data/store.log"),
-) -> FastAPI:
-    store = KeyValueStore(log_path)
+def create_app(log_path: str | Path | None = None) -> FastAPI:
+    resolved_path = (
+        Path(log_path)
+        if log_path is not None
+        else Path(os.getenv("KV_LOG_PATH") or "data/store.log")
+    )
+    store = KeyValueStore(resolved_path)
     metrics = Metrics()
 
     @asynccontextmanager
-    async def lifespan(_: FastAPI):
+    async def lifespan(_: FastAPI) -> AsyncIterator[None]:
         yield
         store.compact()
 
