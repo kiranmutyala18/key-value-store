@@ -67,11 +67,13 @@ class KeyValueStore:
                 except PermissionError:
                     # Some restricted Windows filesystems deny replacement of an
                     # existing file. This compatibility path is not crash-atomic.
-                    with temporary_path.open("rb") as source:
-                        with self._log_path.open("wb") as destination:
-                            destination.write(source.read())
-                            destination.flush()
-                            os.fsync(destination.fileno())
+                    with (
+                        temporary_path.open("rb") as source,
+                        self._log_path.open("wb") as destination,
+                    ):
+                        destination.write(source.read())
+                        destination.flush()
+                        os.fsync(destination.fileno())
             finally:
                 if temporary_path.exists():
                     temporary_path.unlink()
@@ -111,10 +113,12 @@ class KeyValueStore:
 
     @staticmethod
     def _validate_key(key: str) -> None:
-        if not isinstance(key, str) or not key:
+        if not isinstance(key, str):
+            raise TypeError("key must be a string")
+        if not key:
             raise ValueError("key must be a non-empty string")
 
     @staticmethod
     def _validate_value(value: str) -> None:
         if not isinstance(value, str):
-            raise ValueError("value must be a string")
+            raise TypeError("value must be a string")

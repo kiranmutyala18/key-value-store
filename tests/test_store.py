@@ -84,12 +84,18 @@ def test_concurrent_writes_are_not_lost() -> None:
         assert store.get(f"key-{number}") == str(number)
 
 
-@pytest.mark.parametrize("key", ["", 42, None])
+@pytest.mark.parametrize("key", [""])
 def test_invalid_keys_are_rejected(key: object) -> None:
     with pytest.raises(ValueError, match="key must be a non-empty string"):
         KeyValueStore().get(key)  # type: ignore[arg-type]
 
 
+@pytest.mark.parametrize("key", [42, None])
+def test_non_string_keys_are_rejected(key: object) -> None:
+    with pytest.raises(TypeError, match="key must be a string"):
+        KeyValueStore().get(key)  # type: ignore[arg-type]
+
+
 def test_invalid_value_is_rejected() -> None:
-    with pytest.raises(ValueError, match="value must be a string"):
+    with pytest.raises(TypeError, match="value must be a string"):
         KeyValueStore().set("count", 3)  # type: ignore[arg-type]
