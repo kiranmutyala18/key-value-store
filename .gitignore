@@ -1,7 +1,4 @@
-<<<<<<< HEAD
 __pycache__/
 .pytest_cache/
 *.log
-=======
-__pycache__/\n.pytest_cache/\n*.log\n
->>>>>>> dd7b18bbe642e12141fb74d42822a878a3ea5a42
+*.egg-info/
