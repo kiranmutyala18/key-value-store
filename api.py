@@ -35,12 +35,20 @@ class Metrics:
         self._requests[operation] += 1
 
     def prometheus(self) -> str:
-        lines = ["# HELP kv_requests_total Requests by operation.", "# TYPE kv_requests_total counter"]
-        lines.extend(f'kv_requests_total{{operation="{name}"}} {count}' for name, count in sorted(self._requests.items()))
+        lines = [
+            "# HELP kv_requests_total Requests by operation.",
+            "# TYPE kv_requests_total counter",
+        ]
+        lines.extend(
+            f'kv_requests_total{{operation="{name}"}} {count}'
+            for name, count in sorted(self._requests.items())
+        )
         return "\n".join(lines) + "\n"
 
 
-def create_app(log_path: str | Path = Path(os.getenv("KV_LOG_PATH") or "data/store.log")) -> FastAPI:
+def create_app(
+    log_path: str | Path = Path(os.getenv("KV_LOG_PATH") or "data/store.log"),
+) -> FastAPI:
     store = KeyValueStore(log_path)
     metrics = Metrics()
 
@@ -57,7 +65,10 @@ def create_app(log_path: str | Path = Path(os.getenv("KV_LOG_PATH") or "data/sto
         try:
             await asyncio.to_thread(store.set, key, request.value)
         except ValueError as error:
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(error)) from error
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=str(error),
+            ) from error
         return ValueResponse(key=key, value=request.value)
 
     @app.get("/v1/keys/{key}", response_model=ValueResponse)
@@ -66,7 +77,10 @@ def create_app(log_path: str | Path = Path(os.getenv("KV_LOG_PATH") or "data/sto
         try:
             value = await asyncio.to_thread(store.get, key)
         except ValueError as error:
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(error)) from error
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=str(error),
+            ) from error
         if value is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="key not found")
         return ValueResponse(key=key, value=value)
@@ -77,7 +91,10 @@ def create_app(log_path: str | Path = Path(os.getenv("KV_LOG_PATH") or "data/sto
         try:
             deleted = await asyncio.to_thread(store.delete, key)
         except ValueError as error:
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(error)) from error
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=str(error),
+            ) from error
         if not deleted:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="key not found")
         return DeleteResponse(deleted=True)
