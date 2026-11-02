@@ -40,7 +40,7 @@ class Metrics:
         return "\n".join(lines) + "\n"
 
 
-def create_app(log_path: str | Path = Path(os.getenv("KV_LOG_PATH", "data/store.log"))) -> FastAPI:
+def create_app(log_path: str | Path = Path(os.getenv("KV_LOG_PATH") or "data/store.log")) -> FastAPI:
     store = KeyValueStore(log_path)
     metrics = Metrics()
 
